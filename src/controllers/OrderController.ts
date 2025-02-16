@@ -7,6 +7,7 @@ import { verifyWebhook } from '../utils/webhookVerify';
 import { WebhookService } from '../services/webhook.service';
 import { WebhookPayload } from '../types/webhook.types';
 import crypto from 'crypto';
+import { getVietnamTime, getFormattedVietnamTime } from '../utils/dateTime';
 
 dotenv.config();
 
@@ -54,7 +55,7 @@ export const sendOrder = async (req: Request, res: Response) => {
         };
 
         console.log(orderData);
-        console.log(new Date().toISOString());
+        console.log(getVietnamTime());
 
         // Gọi API Bao Kim
         const response = await axios.post(API_URL, orderData, {
