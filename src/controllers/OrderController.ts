@@ -44,14 +44,11 @@ export const sendOrder = async (req: Request, res: Response) => {
             mrc_order_id: mrc_order_id,
             total_amount: parseInt(req.body.price),
             description: `Thanh toán đơn hàng ${mrc_order_id}`,
-            webhook_url: URL_WEBHOOK,
+            webhooks: URL_WEBHOOK,
             url_success: URL_SUCCESS,
             url_cancel: URL_CANCEL,
             url_detail: URL_DETAIL,
-            lang: req.body.lang || 'vi',
-            customer_email: req.body.customer_email || 'example@email.com',
-            customer_phone: req.body.customer_phone || '0123456789',
-            customer_name: req.body.customer_name || 'Nguyen Van A'
+            lang: req.body.lang || 'vi'
         };
 
         console.log(orderData);
