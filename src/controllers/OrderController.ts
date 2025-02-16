@@ -54,6 +54,7 @@ export const sendOrder = async (req: Request, res: Response) => {
         };
 
         console.log(orderData);
+        console.log(new Date().toISOString());
 
         // Gọi API Bao Kim
         const response = await axios.post(API_URL, orderData, {
