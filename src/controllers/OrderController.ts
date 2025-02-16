@@ -19,6 +19,7 @@ const URL_SUCCESS = process.env.PAYMENT_URL_SUCCESS;
 const URL_CANCEL = process.env.PAYMENT_URL_CANCEL;
 const URL_DETAIL = process.env.PAYMENT_URL_DETAIL;
 const URL_WEBHOOK = process.env.PAYMENT_URL_WEBHOOK;
+console.log(URL_WEBHOOK);
 
 const webhookService = new WebhookService();
 
@@ -50,6 +51,8 @@ export const sendOrder = async (req: Request, res: Response) => {
             customer_phone: req.body.customer_phone || '0123456789',
             customer_name: req.body.customer_name || 'Nguyen Van A'
         };
+
+        console.log(orderData);
 
         // Gọi API Bao Kim
         const response = await axios.post(API_URL, orderData, {
