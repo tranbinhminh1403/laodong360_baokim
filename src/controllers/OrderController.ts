@@ -4,6 +4,8 @@ import { generateJWTToken } from '../utils/jwt';
 import dotenv from 'dotenv';
 import * as OrderRepository from '../repositories/OrderRepository';
 import { verifyWebhook } from '../utils/webhookVerify';
+import { WebhookService } from '../services/webhook.service';
+import { WebhookPayload } from '../types/webhook.types';
 
 dotenv.config();
 
@@ -17,6 +19,8 @@ const URL_SUCCESS = process.env.PAYMENT_URL_SUCCESS;
 const URL_CANCEL = process.env.PAYMENT_URL_CANCEL;
 const URL_DETAIL = process.env.PAYMENT_URL_DETAIL;
 const URL_WEBHOOK = process.env.PAYMENT_URL_WEBHOOK;
+
+const webhookService = new WebhookService();
 
 export const sendOrder = async (req: Request, res: Response) => {
     try {
@@ -86,42 +90,79 @@ export const sendOrder = async (req: Request, res: Response) => {
 
 export const handleWebhook = async (req: Request, res: Response) => {
     try {
-        if (!SECRET_KEY) {
+        if (!process.env.SECRET_KEY) {
             throw new Error('SECRET_KEY is not configured');
         }
 
-        // Log the raw webhook data
-        console.log('=== Webhook Data Received ===');
-        console.log('Headers:', req.headers);
-        console.log('Body:', JSON.stringify(req.body, null, 2));
-        console.log('========================');
+        console.log('\n=== BAOKIM WEBHOOK DATA RECEIVED ===');
+        console.log('\n1. Request Headers:');
+        console.log(JSON.stringify(req.headers, null, 2));
 
-        const webhookData = JSON.stringify(req.body);
-        const isValid = verifyWebhook(SECRET_KEY, webhookData);
+        console.log('\n2. Order Information:');
+        console.log('Order ID:', req.body.order?.mrc_order_id);
+        console.log('Total Amount:', req.body.order?.total_amount);
+        console.log('Status:', req.body.order?.stat);
+        console.log('Customer:', {
+            name: req.body.order?.customer_name,
+            email: req.body.order?.customer_email,
+            phone: req.body.order?.customer_phone
+        });
 
+        console.log('\n3. Transaction Details:');
+        console.log('Transaction ID:', req.body.txn?.id);
+        console.log('Reference ID:', req.body.txn?.reference_id);
+        console.log('Status:', req.body.txn?.stat);
+        console.log('Completed At:', req.body.txn?.completed_at);
+        console.log('Bank Reference:', req.body.txn?.bank_ref_no);
+
+        if (req.body.dataToken) {
+            console.log('\n4. Card Token Information:');
+            console.log('Card Type:', req.body.dataToken[0]?.card_type);
+            console.log('Bank Code:', req.body.dataToken[0]?.bank_code);
+            // Don't log full card details for security
+        }
+
+        console.log('\n5. Raw Webhook Data:');
+        console.log(JSON.stringify(req.body, null, 2));
+        console.log('\n=====================================\n');
+
+        const webhookData = req.body as WebhookPayload;
+        
+        // 1. Verify signature
+        const isValid = verifyWebhook(process.env.SECRET_KEY, webhookData);
         if (!isValid) {
-            console.log('❌ Invalid webhook signature');
-            return res.status(401).json({
-                success: false,
-                error: 'Invalid webhook signature'
+            console.log('❌ Signature Verification Failed');
+            return res.status(200).json({
+                err_code: "1",
+                message: "Invalid signature"
             });
         }
 
-        // Log the verified webhook data
-        console.log('✅ Webhook signature verified');
-        console.log('Transaction Status:', req.body.txn?.stat);
-        console.log('Order ID:', req.body.order?.mrc_order_id);
-        console.log('Amount:', req.body.txn?.total_amount);
+        console.log('✅ Signature Verified Successfully');
+        
+        // 2. Process webhook
+        const success = await webhookService.processWebhook(webhookData);
+        
+        // 3. Return appropriate response
+        if (success) {
+            console.log('✅ Webhook Processed Successfully');
+            return res.status(200).json({
+                err_code: "0",
+                message: "Payment processed successfully"
+            });
+        } else {
+            console.log('❌ Webhook Processing Failed');
+            return res.status(200).json({
+                err_code: "1",
+                message: "Payment processing failed"
+            });
+        }
 
-        return res.status(200).json({
-            success: true,
-            message: 'Webhook processed successfully'
-        });
     } catch (error: any) {
-        console.error('Webhook processing error:', error.message);
-        return res.status(500).json({
-            success: false,
-            error: error.message
+        console.error('❌ Webhook Error:', error.message);
+        return res.status(200).json({
+            err_code: "1",
+            message: error.message.substring(0, 255)
         });
     }
 }; 

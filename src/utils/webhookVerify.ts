@@ -1,9 +1,9 @@
 import crypto from 'crypto';
+import { WebhookPayload } from '../types/webhook.types';
 
-export function verifyWebhook(secretKey: string, webhookData: string): boolean {
+export function verifyWebhook(secretKey: string, webhookData: WebhookPayload): boolean {
     try {
-        const webhookObj = JSON.parse(webhookData);
-        const { sign: receivedSignature, ...dataWithoutSign } = webhookObj;
+        const { sign: receivedSignature, ...dataWithoutSign } = webhookData;
         
         // Create signature from the data
         const dataString = JSON.stringify(dataWithoutSign);
@@ -12,7 +12,6 @@ export function verifyWebhook(secretKey: string, webhookData: string): boolean {
             .update(dataString)
             .digest('hex');
 
-        // Compare signatures
         return calculatedSignature === receivedSignature;
     } catch (error) {
         console.error('Webhook verification error:', error);
