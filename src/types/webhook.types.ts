@@ -7,13 +7,20 @@ export interface BaoKimOrder {
     merchant_id: number;
     total_amount: number;
     description: string;
-    items: any | null;
+    items: string;
     url_success: string;
+    url_cancel: string | null;
     url_detail: string;
     stat: 'c' | 'd' | 'p';  // complete, destroy, pending
     lang: string;
-    type: string;
+    type: number;
     bpm_id: string;
+    accept_qrpay: number;
+    accept_bank: number;
+    accept_cc: number;
+    accept_ib: number;
+    accept_ewallet: number;
+    accept_installments: number;
     email: string;
     name: string;
     webhooks: string;
@@ -38,18 +45,23 @@ export interface BaoKimTransaction {
     bank_fee_amount: number;
     bank_fix_fee_amount: number;
     fee_payer: number;
-    auth_code: number | null;
+    bank_fee_payer: number;
+    auth_code: string | null;
     auth_time: string;
     ref_no: string | null;
     bpm_id: string;
     bank_ref_no: string;
-    stat: 0 | 1 | 2;  // 0: pending, 1: success, 2: fail
+    bpm_type: number;
+    gateway: string;
+    stat: number;
+    init_token: string | null;
     description: string;
     customer_email: string;
     customer_phone: string;
+    completed_at: string;
     created_at: string;
     updated_at: string;
-    completed_at: string;
+    deleted_at: string | null;
 }
 
 export interface BaoKimDataToken {
@@ -64,6 +76,6 @@ export interface BaoKimDataToken {
 export interface WebhookPayload {
     order: BaoKimOrder;
     txn: BaoKimTransaction;
-    dataToken?: BaoKimDataToken[];
+    dataToken: BaoKimDataToken;
     sign: string;
 } 
