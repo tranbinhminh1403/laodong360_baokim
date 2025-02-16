@@ -1,14 +1,19 @@
 import express from "express";
 import { AppDataSource } from "./config/data-source";
-// import routes from "./routes";
+import orderRoutes from "./routes/order.routes";
 import cors from "cors";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(cors())
-// app.use("/api/v1/mbank", routes);
+app.use(cors());
+
+// Thêm routes
+app.use('/api/v1/orders', orderRoutes);
 
 AppDataSource.initialize()
     .then(() => {
