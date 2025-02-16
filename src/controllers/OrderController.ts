@@ -173,6 +173,13 @@ export const testVerifyWebhook = async (req: Request, res: Response) => {
             .digest('hex')
             .toLowerCase();
 
+        
+        console.log({
+            receivedSignature,
+            calculatedSignature,
+            isValid: calculatedSignature === receivedSignature
+        })
+
         return res.status(200).json({
             success: true,
             data: {
