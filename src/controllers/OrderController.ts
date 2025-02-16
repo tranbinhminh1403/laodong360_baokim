@@ -6,6 +6,7 @@ import * as OrderRepository from '../repositories/OrderRepository';
 import { verifyWebhook } from '../utils/webhookVerify';
 import { WebhookService } from '../services/webhook.service';
 import { WebhookPayload } from '../types/webhook.types';
+import crypto from 'crypto';
 
 dotenv.config();
 
@@ -166,6 +167,49 @@ export const handleWebhook = async (req: Request, res: Response) => {
         return res.status(200).json({
             err_code: "1",
             message: error.message.substring(0, 255)
+        });
+    }
+};
+
+export const testVerifyWebhook = async (req: Request, res: Response) => {
+    try {
+        const { secretKey, webhookData } = req.body;
+        
+        if (!secretKey || !webhookData) {
+            return res.status(400).json({
+                success: false,
+                message: 'Thiếu secretKey hoặc webhookData'
+            });
+        }
+
+        // Lấy signature từ webhook data
+        const webhookObj = JSON.parse(webhookData);
+        const receivedSignature = webhookObj.sign;
+
+        // Tạo dataHash bằng cách cắt bỏ phần signature
+        const lastBraceIndex = webhookData.lastIndexOf('}');
+        const dataHash = webhookData.substring(0, lastBraceIndex + 1);
+
+        // Tạo signature mới
+        const calculatedSignature = crypto
+            .createHmac('sha256', secretKey)
+            .update(dataHash)
+            .digest('hex')
+            .toLowerCase();
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                receivedSignature,
+                calculatedSignature,
+                isValid: calculatedSignature === receivedSignature
+            }
+        });
+
+    } catch (error: any) {
+        return res.status(500).json({
+            success: false,
+            message: error.message
         });
     }
 }; 
