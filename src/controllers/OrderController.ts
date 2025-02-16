@@ -97,56 +97,31 @@ export const handleWebhook = async (req: Request, res: Response) => {
             throw new Error('SECRET_KEY is not configured');
         }
 
+        // Get webhook data (could be string or JSON)
+        const webhookData = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+
         console.log('\n=== BAOKIM WEBHOOK DATA RECEIVED ===');
-        console.log('\n1. Request Headers:');
-        console.log(JSON.stringify(req.headers, null, 2));
+        console.log('\n1. Raw Webhook Data:');
+        console.log(webhookData);
 
-        console.log('\n2. Order Information:');
-        console.log('Order ID:', req.body.order?.mrc_order_id);
-        console.log('Total Amount:', req.body.order?.total_amount);
-        console.log('Status:', req.body.order?.stat);
-        console.log('Customer:', {
-            name: req.body.order?.customer_name,
-            email: req.body.order?.customer_email,
-            phone: req.body.order?.customer_phone
-        });
-
-        console.log('\n3. Transaction Details:');
-        console.log('Transaction ID:', req.body.txn?.id);
-        console.log('Reference ID:', req.body.txn?.reference_id);
-        console.log('Status:', req.body.txn?.stat);
-        console.log('Completed At:', req.body.txn?.completed_at);
-        console.log('Bank Reference:', req.body.txn?.bank_ref_no);
-
-        if (req.body.dataToken) {
-            console.log('\n4. Card Token Information:');
-            console.log('Card Type:', req.body.dataToken[0]?.card_type);
-            console.log('Bank Code:', req.body.dataToken[0]?.bank_code);
-            // Don't log full card details for security
-        }
-
-        console.log('\n5. Raw Webhook Data:');
-        console.log(JSON.stringify(req.body, null, 2));
-        console.log('\n=====================================\n');
-
-        const webhookData = req.body as WebhookPayload;
-        
-        // 1. Verify signature
+        // Verify signature
         const isValid = verifyWebhook(process.env.SECRET_KEY, webhookData);
         if (!isValid) {
-            console.log('❌ Signature Verification Failed');
+            console.log('❌ Invalid webhook signature');
             return res.status(200).json({
                 err_code: "1",
                 message: "Invalid signature"
             });
         }
 
-        console.log('✅ Signature Verified Successfully');
+        // Parse data if it's a string
+        const parsedData: WebhookPayload = typeof webhookData === 'string' 
+            ? JSON.parse(webhookData) 
+            : webhookData;
+
+        // Process webhook
+        const success = await webhookService.processWebhook(parsedData);
         
-        // 2. Process webhook
-        const success = await webhookService.processWebhook(webhookData);
-        
-        // 3. Return appropriate response
         if (success) {
             console.log('✅ Webhook Processed Successfully');
             return res.status(200).json({
@@ -168,4 +143,15 @@ export const handleWebhook = async (req: Request, res: Response) => {
             message: error.message.substring(0, 255)
         });
     }
+};
+
+export const testWebhook = async (req: Request, res: Response) => {
+    console.log('Test webhook received');
+    console.log('Headers:', req.headers);
+    console.log('Body:', req.body);
+    
+    return res.status(200).json({
+        err_code: "0",
+        message: "Test webhook received successfully"
+    });
 }; 
