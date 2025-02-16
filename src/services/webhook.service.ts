@@ -1,7 +1,6 @@
 import { BaoKimDataToken, WebhookPayload } from '../types/webhook.types';
 import { Orders } from '../entities/Orders';
 import { AppDataSource } from '../config/data-source';
-import { sendPaymentSuccessEmail } from './EmailService';
 
 export class WebhookService {
     private orderRepository = AppDataSource.getRepository(Orders);
@@ -32,19 +31,6 @@ export class WebhookService {
         // 4. Process card token if exists
         if (dataToken && dataToken.length > 0) {
             await this.processCardToken(dataToken[0], order.mrc_order_id);
-        }
-
-        // 5. Send confirmation email
-        try {
-            await sendPaymentSuccessEmail({
-                orderReference: order.mrc_order_id,
-                amount: txn.total_amount,
-                customerName: order.customer_name,
-                customerEmail: order.customer_email
-            });
-        } catch (error) {
-            console.error('Failed to send email:', error);
-            // Continue processing even if email fails
         }
 
         return true;
