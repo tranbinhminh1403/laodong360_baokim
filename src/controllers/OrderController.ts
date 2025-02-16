@@ -146,6 +146,7 @@ export const handleWebhook = async (req: Request, res: Response) => {
 };
 
 export const testVerifyWebhook = async (req: Request, res: Response) => {
+    console.log('log này được viết bởi trung vũ xemm baokim có call api không lúc ', getVietnamTime());
     try {
         const { secretKey, webhookData } = req.body;
         
