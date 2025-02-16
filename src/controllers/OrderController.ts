@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import axios from 'axios';
 import { generateJWTToken } from '../utils/jwt';
 import dotenv from 'dotenv';
+import * as OrderRepository from '../repositories/OrderRepository';
 
 dotenv.config();
 
@@ -10,10 +11,15 @@ const SECRET_KEY = process.env.SECRET_KEY;
 const MERCHANT_ID = process.env.MERCHANT_ID;
 const API_URL = 'https://dev-api.baokim.vn/payment/api/v5/order/send';
 
+// Lấy URLs từ biến môi trường
+const URL_SUCCESS = process.env.PAYMENT_URL_SUCCESS;
+const URL_CANCEL = process.env.PAYMENT_URL_CANCEL;
+const URL_DETAIL = process.env.PAYMENT_URL_DETAIL;
+
 export const sendOrder = async (req: Request, res: Response) => {
     try {
-        if (!API_KEY || !SECRET_KEY || !MERCHANT_ID) {
-            throw new Error('Thiếu thông tin cấu hình API_KEY, SECRET_KEY hoặc MERCHANT_ID');
+        if (!API_KEY || !SECRET_KEY || !MERCHANT_ID || !URL_SUCCESS || !URL_CANCEL || !URL_DETAIL) {
+            throw new Error('Thiếu thông tin cấu hình trong biến môi trường');
         }
 
         // Tạo JWT token
@@ -27,13 +33,12 @@ export const sendOrder = async (req: Request, res: Response) => {
         const orderData = {
             merchant_id: parseInt(MERCHANT_ID),
             mrc_order_id: mrc_order_id,
-            total_amount: parseInt(req.body.total_amount) || 24000,
-            description: req.body.description || 'Test order payment',
-            url_success: req.body.url_success || 'https://your-website.com/success',
-            url_cancel: req.body.url_cancel || 'https://your-website.com/cancel',
-            url_detail: req.body.url_detail || 'https://your-website.com/detail',
+            total_amount: parseInt(req.body.price),
+            description: `Thanh toán đơn hàng ${mrc_order_id}`,
+            url_success: URL_SUCCESS,
+            url_cancel: URL_CANCEL,
+            url_detail: URL_DETAIL,
             lang: req.body.lang || 'vi',
-            // bpm_id: parseInt(req.body.bpm_id) || 1,
             customer_email: req.body.customer_email || 'example@email.com',
             customer_phone: req.body.customer_phone || '0123456789',
             customer_name: req.body.customer_name || 'Nguyen Van A'
@@ -47,11 +52,23 @@ export const sendOrder = async (req: Request, res: Response) => {
             }
         });
 
+        // Nếu API call thành công, lưu order vào DB
+        if (response.data.data.order_id) {
+            await OrderRepository.createOrder({
+                ...req.body,
+                mrc_order_id,
+                order_id: response.data.data.order_id,
+                status: "Pending"
+            });
+        }
+
         return res.status(200).json({
             success: true,
-            data: response.data,
-            order_id: mrc_order_id,
-            request_data: orderData
+            data: {
+                order_id: response.data.data.order_id,
+                redirect_url: response.data.data.redirect_url,
+                payment_url: response.data.data.payment_url
+            }
         });
 
     } catch (error: any) {
