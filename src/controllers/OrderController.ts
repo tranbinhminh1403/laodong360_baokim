@@ -126,7 +126,7 @@ export const handleWebhook = async (req: Request, res: Response) => {
             console.log('✅ Webhook Processed Successfully');
             return res.status(200).json({
                 err_code: "0",
-                message: "Payment processed successfully"
+                message: "some message"
             });
         } else {
             console.log('❌ Webhook Processing Failed');
