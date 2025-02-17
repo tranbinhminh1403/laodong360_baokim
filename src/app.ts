@@ -1,9 +1,9 @@
 import express from "express";
 import { AppDataSource } from "./config/data-source";
-import orderRoutes from "./routes/order.routes";
 import cors from "cors";
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
+import orderRoutes from "./routes/Routes";
 
 dotenv.config();
 

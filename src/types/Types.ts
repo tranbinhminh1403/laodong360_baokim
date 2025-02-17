@@ -78,4 +78,29 @@ export interface WebhookPayload {
     txn: BaoKimTransaction;
     dataToken: BaoKimDataToken;
     sign: string;
+}
+
+export interface IOrderRequest {
+  price: number;
+  lang?: string;
+  email: string;
+  age: number;
+  fullName: string;
+  gender: string;
+  phoneNumber: string;
+  note: string;
+  title: string;
+  period: string;
+  time: string;
+}
+
+export interface IOrderResponse {
+  success: boolean;
+  data?: {
+    order_id: number;
+    redirect_url: string;
+    payment_url: string;
+  };
+  error?: string;
+  error_response?: any;
 } 

@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { WebhookPayload } from '../types/webhook.types';
+import { WebhookPayload } from '../types/Types';
 
 export function verifyWebhook(secretKey: string, webhookData: string): boolean {
     try {
