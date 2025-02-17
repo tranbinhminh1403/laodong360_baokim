@@ -1,7 +1,7 @@
 import { WebhookPayload } from '../types/Types';
 import * as OrderRepository from '../repositories/OrderRepository';
 import { verifyWebhook } from '../utils/webhookVerify';
-import { sendPaymentSuccessEmail } from './EmailService';
+import { sendPaymentSuccessEmail, sendPaymentSuccessEmailToAdmin } from './EmailService';
 
 export const handleWebhook = async (
   webhookData: string,
@@ -54,7 +54,8 @@ const processWebhook = async (payload: WebhookPayload): Promise<boolean> => {
   // await sendPaymentSuccessEmail(existingOrder);
   await Promise.all([
     OrderRepository.updateOrderStatus(existingOrder.id, 'Completed'),
-    sendPaymentSuccessEmail(existingOrder)
+    sendPaymentSuccessEmail(existingOrder),
+    sendPaymentSuccessEmailToAdmin(existingOrder)
   ]);
 
   return true;
