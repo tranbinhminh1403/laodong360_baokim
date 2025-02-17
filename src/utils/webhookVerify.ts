@@ -3,29 +3,28 @@ import { WebhookPayload } from '../types/webhook.types';
 
 export function verifyWebhook(secretKey: string, webhookData: string | WebhookPayload): boolean {
     try {
-        let dataToVerify: WebhookPayload;
+        let dataString: string;
         let receivedSignature: string;
 
-        // Handle string input (like Java example)
+        // Convert to string if object is passed
         if (typeof webhookData === 'string') {
+            dataString = webhookData;
             const parsedData = JSON.parse(webhookData);
-            dataToVerify = parsedData;
             receivedSignature = parsedData.sign;
-        } 
-        // Handle direct JSON payload
-        else {
-            dataToVerify = webhookData;
+        } else {
+            dataString = JSON.stringify(webhookData);
             receivedSignature = webhookData.sign;
         }
 
-        const { sign, ...dataWithoutSign } = dataToVerify;
-        
-        // Create signature from the data
-        const dataString = JSON.stringify(dataWithoutSign);
+        // Create dataHash by removing the last "sign" field similar to Java implementation
+        const dataHash = dataString.substring(0, dataString.lastIndexOf('}')) + '}';
+
+        // Calculate signature
         const calculatedSignature = crypto
             .createHmac('sha256', secretKey)
-            .update(dataString)
-            .digest('hex');
+            .update(dataHash)
+            .digest('hex')
+            .toLowerCase();
 
         return calculatedSignature === receivedSignature;
     } catch (error) {

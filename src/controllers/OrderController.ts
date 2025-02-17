@@ -150,7 +150,7 @@ export const testVerifyWebhook = async (req: Request, res: Response) => {
     console.log("req.body \n", req.body);
     try {
         const webhookData = JSON.stringify(req.body);
-        const secretKey = "9623ac03057e433f95d86cf4f3bef5cc";
+        // const secretKey = SECRET_KEY;
 
         // Lấy signature từ webhook data
         const receivedSignature = req.body.sign;
@@ -160,7 +160,7 @@ export const testVerifyWebhook = async (req: Request, res: Response) => {
 
         // Tạo signature mới sử dụng HMAC-SHA256
         const calculatedSignature = crypto
-            .createHmac('sha256', secretKey)
+            .createHmac('sha256', SECRET_KEY)
             .update(dataHash)
             .digest('hex')
             .toLowerCase();
