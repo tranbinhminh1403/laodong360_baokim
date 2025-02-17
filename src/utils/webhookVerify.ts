@@ -18,6 +18,7 @@ export function verifyWebhook(secretKey: string, webhookData: string | WebhookPa
 
         // Create dataHash by removing the last "sign" field similar to Java implementation
         const dataHash = dataString.substring(0, dataString.lastIndexOf('}')) + '}';
+        console.log("dataHash", dataHash);
 
         // Calculate signature
         const calculatedSignature = crypto
@@ -25,6 +26,15 @@ export function verifyWebhook(secretKey: string, webhookData: string | WebhookPa
             .update(dataHash)
             .digest('hex')
             .toLowerCase();
+
+        const isValid = calculatedSignature === receivedSignature;
+            console.log("isValid", isValid);
+
+            console.log({
+                receivedSignature,
+                calculatedSignature,
+                isValid
+            });
 
         return calculatedSignature === receivedSignature;
     } catch (error) {
