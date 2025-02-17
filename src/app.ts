@@ -3,12 +3,18 @@ import { AppDataSource } from "./config/data-source";
 import orderRoutes from "./routes/order.routes";
 import cors from "cors";
 import dotenv from 'dotenv';
+import bodyParser from 'body-parser';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware để lấy raw body trước khi parse JSON
+// app.use('/api/v1/orders/test-verify', bodyParser.raw({ type: 'application/json' }));
+// app.use(bodyParser.raw({ type: 'application/json' }));
+
+// Các route khác vẫn dùng JSON parser
 app.use(express.json());
 app.use(cors());
 
