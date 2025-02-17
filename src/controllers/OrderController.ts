@@ -97,15 +97,15 @@ export const handleWebhook = async (req: Request, res: Response) => {
             throw new Error('SECRET_KEY is not configured');
         }
 
-        // Get webhook data as string
-        const webhookData = req.body;
+        // Get webhook data (could be string or JSON)
+        const webhookData = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
 
         console.log('\n=== BAOKIM WEBHOOK DATA RECEIVED ===');
-        console.log('\nRaw Webhook Data:');
+        console.log('\n1. Raw Webhook Data:');
         console.log(webhookData);
 
         // Verify signature
-        const isValid = verifyWebhook(SECRET_KEY, webhookData);
+        const isValid = verifyWebhook(process.env.SECRET_KEY, webhookData);
         if (!isValid) {
             console.log('❌ Invalid webhook signature');
             return res.status(200).json({
@@ -114,8 +114,10 @@ export const handleWebhook = async (req: Request, res: Response) => {
             });
         }
 
-        // Parse the string data
-        const parsedData: WebhookPayload = JSON.parse(webhookData);
+        // Parse data if it's a string
+        const parsedData: WebhookPayload = typeof webhookData === 'string' 
+            ? JSON.parse(webhookData) 
+            : webhookData;
 
         // Process webhook
         const success = await webhookService.processWebhook(parsedData);
@@ -145,7 +147,7 @@ export const handleWebhook = async (req: Request, res: Response) => {
 
 export const testVerifyWebhook = async (req: Request, res: Response) => {
     console.log('log này do call api không lúc ', getVietnamTime());
-    // console.log("req.body \n", req.body);
+    console.log("req.body \n", req.body);
     try {
         console.log('=== START WEBHOOK VERIFICATION ===');
         console.log('Webhook received at:', getVietnamTime());
@@ -166,7 +168,7 @@ export const testVerifyWebhook = async (req: Request, res: Response) => {
 
         // Tạo signature mới
         const calculatedSignature = crypto
-            .createHmac('sha256', "SECRET_KEY")
+            .createHmac('sha256', secretKey)
             .update(dataHash)
             .digest('hex')
             .toLowerCase();
