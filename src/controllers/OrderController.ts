@@ -147,45 +147,40 @@ export const handleWebhook = async (req: Request, res: Response) => {
 
 export const testVerifyWebhook = async (req: Request, res: Response) => {
     console.log('log này do call api không lúc ', getVietnamTime());
-    console.log(req.body);
+    console.log("req.body \n", req.body);
     try {
-        const { secretKey, webhookData } = req.body;
-        
-        if (!secretKey || !webhookData) {
-            return res.status(400).json({
-                success: false,
-                message: 'Thiếu secretKey hoặc webhookData'
-            });
-        }
+        const webhookData = JSON.stringify(req.body);
+        const secretKey = "9623ac03057e433f95d86cf4f3bef5cc";
 
         // Lấy signature từ webhook data
-        const webhookObj = JSON.parse(webhookData);
-        const receivedSignature = webhookObj.sign;
+        const receivedSignature = req.body.sign;
 
-        // Tạo dataHash bằng cách cắt bỏ phần signature
-        const lastBraceIndex = webhookData.lastIndexOf('}');
-        const dataHash = webhookData.substring(0, lastBraceIndex + 1);
+        // Tạo dataHash bằng cách cắt bỏ phần signature giống Java
+        const dataHash = webhookData.substring(0, webhookData.lastIndexOf('}')) + '}';
 
-        // Tạo signature mới
+        // Tạo signature mới sử dụng HMAC-SHA256
         const calculatedSignature = crypto
             .createHmac('sha256', secretKey)
             .update(dataHash)
             .digest('hex')
             .toLowerCase();
 
-        
+        // So sánh signature
+        const isValid = receivedSignature === calculatedSignature;
+        console.log("isValid", isValid);
+
         console.log({
             receivedSignature,
             calculatedSignature,
-            isValid: calculatedSignature === receivedSignature
-        })
+            isValid
+        });
 
         return res.status(200).json({
             success: true,
             data: {
                 receivedSignature,
                 calculatedSignature,
-                isValid: calculatedSignature === receivedSignature
+                isValid
             }
         });
 
