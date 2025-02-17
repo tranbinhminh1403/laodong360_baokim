@@ -145,49 +145,49 @@ export const handleWebhook = async (req: Request, res: Response) => {
     }
 };
 
-export const testVerifyWebhook = async (req: Request, res: Response) => {
-    console.log('log này do call api không lúc ', getVietnamTime());
-    console.log("req.body \n", req.body);
-    try {
-        console.log('=== START WEBHOOK VERIFICATION ===');
-        console.log('Webhook received at:', getVietnamTime());
+// export const testVerifyWebhook = async (req: Request, res: Response) => {
+//     // console.log('log này do call api không lúc ', getVietnamTime());
+//     // console.log("req.body \n", req.body);
+//     try {
+//         console.log('=== START WEBHOOK VERIFICATION ===');
+//         console.log('Webhook received at:', getVietnamTime());
 
-        // Chuyển JSON thành string với escape characters
-        const webhookData = JSON.stringify(req.body).replace(/\//g, '\\/');
-        console.log('Webhook data after stringify:', webhookData);
+//         // Chuyển JSON thành string với escape characters
+//         const webhookData = JSON.stringify(req.body).replace(/\//g, '\\/');
+//         console.log('Webhook data after stringify:', webhookData);
 
-        const secretKey = "9623ac03057e433f95d86cf4f3bef5cc";
+//         const secretKey = process.env.SECRET_KEY;
 
-        // Tạo dataHash bằng cách cắt bỏ 75 ký tự cuối và thêm dấu } như Java
-        const dataHash = webhookData.substring(0, webhookData.length - 75) + "}";
-        console.log('Data hash:', dataHash);
+//         // Tạo dataHash bằng cách cắt bỏ 75 ký tự cuối và thêm dấu } như Java
+//         const dataHash = webhookData.substring(0, webhookData.length - 75) + "}";
+//         console.log('Data hash:', dataHash);
 
-        // Parse webhook data để lấy signature
-        const receivedSignature = req.body.sign;
-        console.log('Received signature:', receivedSignature);
+//         // Parse webhook data để lấy signature
+//         const receivedSignature = req.body.sign;
+//         console.log('Received signature:', receivedSignature);
 
-        // Tạo signature mới
-        const calculatedSignature = crypto
-            .createHmac('sha256', secretKey)
-            .update(dataHash)
-            .digest('hex')
-            .toLowerCase();
+//         // Tạo signature mới
+//         const calculatedSignature = crypto
+//             .createHmac('sha256', secretKey)
+//             .update(dataHash)
+//             .digest('hex')
+//             .toLowerCase();
         
-        console.log('Calculated signature:', calculatedSignature);
+//         console.log('Calculated signature:', calculatedSignature);
 
-        const isValid = receivedSignature === calculatedSignature;
-        console.log('Is valid:', isValid);
+//         const isValid = receivedSignature === calculatedSignature;
+//         console.log('Is valid:', isValid);
 
-        return res.status(200).json({
-            err_code: isValid ? "0" : "1",
-            message: isValid ? "Signature verified" : "Invalid signature"
-        });
+//         return res.status(200).json({
+//             err_code: isValid ? "0" : "1",
+//             message: isValid ? "Signature verified" : "Invalid signature"
+//         });
 
-    } catch (error: any) {
-        console.error('Error:', error);
-        return res.status(200).json({
-            err_code: "1",
-            message: error.message
-        });
-    }
-}; 
+//     } catch (error: any) {
+//         console.error('Error:', error);
+//         return res.status(200).json({
+//             err_code: "1",
+//             message: error.message
+//         });
+//     }
+// }; 

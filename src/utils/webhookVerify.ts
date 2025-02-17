@@ -1,24 +1,17 @@
 import crypto from 'crypto';
 import { WebhookPayload } from '../types/webhook.types';
 
-export function verifyWebhook(secretKey: string, webhookData: string | WebhookPayload): boolean {
+export function verifyWebhook(secretKey: string, webhookData: string): boolean {
     try {
-        let dataString: string;
-        let receivedSignature: string;
-
-        // Convert to string if object is passed
-        if (typeof webhookData === 'string') {
-            dataString = webhookData;
-            const parsedData = JSON.parse(webhookData);
-            receivedSignature = parsedData.sign;
-        } else {
-            dataString = JSON.stringify(webhookData);
-            receivedSignature = webhookData.sign;
-        }
+        // Convert JSON to string with escaped forward slashes
+        const dataString = JSON.stringify(JSON.parse(webhookData)).replace(/\//g, '\\/');
+        
+        // Get signature from parsed data
+        const parsedData = JSON.parse(webhookData);
+        const receivedSignature = parsedData.sign;
 
         // Create dataHash by removing the last 75 characters and adding back }
         const dataHash = dataString.substring(0, dataString.length - 75) + '}';
-        console.log("dataHash", dataHash);
 
         // Calculate signature
         const calculatedSignature = crypto
@@ -27,14 +20,13 @@ export function verifyWebhook(secretKey: string, webhookData: string | WebhookPa
             .digest('hex')
             .toLowerCase();
 
-        const isValid = calculatedSignature === receivedSignature;
-            console.log("isValid", isValid);
 
-            console.log({
-                receivedSignature,
-                calculatedSignature,
-                isValid
-            });
+        console.log('Secret Key:', secretKey);
+        console.log('Data Hash:', dataHash);
+        console.log('===========================================');
+        console.log("isValid:", calculatedSignature === receivedSignature);
+        console.log('Calculated Signature:', calculatedSignature);
+        console.log('Received Signature:', receivedSignature);
 
         return calculatedSignature === receivedSignature;
     } catch (error) {
