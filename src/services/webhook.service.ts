@@ -24,10 +24,10 @@ export class WebhookService {
             return false;
         }
 
-        if (existingOrder.price !== order.total_amount) {
-            console.log('Amount mismatch');
-            return false;
-        }
+        // if (existingOrder.price !== order.total_amount) {
+        //     console.log('Amount mismatch');
+        //     return false;
+        // }
 
         // 3. Update order status
         existingOrder.status = 'Completed';

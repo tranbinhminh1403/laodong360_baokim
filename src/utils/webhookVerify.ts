@@ -21,7 +21,7 @@ export function verifyWebhook(secretKey: string, webhookData: string): boolean {
             .toLowerCase();
 
 
-        console.log('Secret Key:', secretKey);
+        // console.log('Secret Key:', secretKey);
         console.log('Data Hash:', dataHash);
         console.log('===========================================');
         console.log("isValid:", calculatedSignature === receivedSignature);
