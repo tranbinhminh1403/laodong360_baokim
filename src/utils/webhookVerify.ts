@@ -16,8 +16,8 @@ export function verifyWebhook(secretKey: string, webhookData: string | WebhookPa
             receivedSignature = webhookData.sign;
         }
 
-        // Create dataHash by removing the last "sign" field similar to Java implementation
-        const dataHash = dataString.substring(0, dataString.lastIndexOf('}')) + '}';
+        // Create dataHash by removing the last 75 characters and adding back }
+        const dataHash = dataString.substring(0, dataString.length - 75) + '}';
         console.log("dataHash", dataHash);
 
         // Calculate signature
