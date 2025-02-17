@@ -18,36 +18,30 @@ export const createOrder = async (
   config: OrderConfig
 ): Promise<IOrderResponse> => {
   try {
+    // 1. Chuẩn bị dữ liệu trước
     const jwtToken = generateJWTToken(config.API_KEY, config.SECRET_KEY);
     const mrc_order_id = `ORDER_${Math.floor(Date.now() / 1000)}`;
-    const API_URL = process.env.API_CREATE_ORDER_URL || '';
+    
+    // 2. Thực hiện các tác vụ song song không phụ thuộc nhau
+    const [response] = await Promise.all([
+      // Call API tạo order
+      axios.post(process.env.API_CREATE_ORDER_URL || '', {
+        merchant_id: parseInt(config.MERCHANT_ID),
+        mrc_order_id,
+        total_amount: parseInt(orderData.price.toString()),
+        description: `Thanh toán đơn hàng ${mrc_order_id}`,
+        webhooks: config.URL_WEBHOOK,
+        url_success: config.URL_SUCCESS,
+        url_cancel: config.URL_CANCEL,
+        lang: orderData.lang || 'vi'
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'jwt': `Bearer ${jwtToken}`
+        }
+      })
+    ]);
 
-    const payload = {
-      merchant_id: parseInt(config.MERCHANT_ID),
-      mrc_order_id,
-      total_amount: parseInt(orderData.price.toString()),
-      description: `Thanh toán đơn hàng ${mrc_order_id}`,
-      webhooks: config.URL_WEBHOOK,
-      url_success: config.URL_SUCCESS,
-      url_cancel: config.URL_CANCEL,
-      lang: orderData.lang || 'vi'
-    };
-
-    const response = await axios.post(API_URL, payload, {
-      headers: {
-        'Content-Type': 'application/json',
-        'jwt': `Bearer ${jwtToken}`
-      }
-    });
-
-    // if (response.data.data.order_id) {
-    //   await OrderRepository.createOrder({
-    //     ...orderData,
-    //     mrc_order_id,
-    //     order_id: response.data.data.order_id,
-    //     status: "Pending"
-    //   });
-    // }
     if (response.data.data.order_id) {
       const order = {
         ...orderData,
@@ -55,22 +49,24 @@ export const createOrder = async (
         order_id: response.data.data.order_id,
         status: "Pending"
       };
-      
+
+      // 3. Thực hiện các tác vụ song song sau khi có order_id
       await Promise.all([
         OrderRepository.createOrder(order),
         sendNewOrderNotification(order)
       ]);
+
+      return {
+        success: true,
+        data: {
+          order_id: response.data.data.order_id,
+          redirect_url: response.data.data.redirect_url,
+          payment_url: response.data.data.payment_url,
+        }
+      };
     }
 
-    return {
-      success: true,
-      data: {
-        order_id: response.data.data.order_id,
-        redirect_url: response.data.data.redirect_url,
-        payment_url: response.data.data.payment_url,
-      }
-    };
-
+    throw new Error('Không thể tạo order');
   } catch (error: any) {
     return {
       success: false,
