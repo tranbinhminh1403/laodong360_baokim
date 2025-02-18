@@ -220,3 +220,61 @@ export const sendPaymentSuccessEmailToAdmin = async (orderData: Partial<Orders>)
     return false;
   }
 }; 
+
+export const sendPaymentSuccessEmailToAccountant = async (orderData: Partial<Orders>): Promise<boolean> => {
+  try {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; }
+          .header { background: #4CAF50; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+          .content { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; }
+          .order-info { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Thông báo thanh toán thành công! 🎉</h1>
+          </div>
+          <div class="content">
+            <div class="order-info">
+              <h3>Thông tin khách hàng:</h3>
+              <p>Họ tên: ${orderData.fullName}</p>
+              <p>Email: ${orderData.email}</p>
+              <p>Số điện thoại: ${orderData.phoneNumber}</p>
+              <p>Tuổi: ${orderData.age}</p>
+              <p>Giới tính: ${orderData.gender}</p>
+            </div>
+
+            <div class="order-info">
+              <h3>Thông tin đơn hàng:</h3>
+              <p>Mã đơn hàng: ${orderData.mrc_order_id}</p>
+              <p>Gói dịch vụ: ${orderData.title}</p>
+              <p>Thời gian tư vấn: ${orderData.period} phút</p>
+              <p>Số tiền: ${Number(orderData.price).toLocaleString('vi-VN')} VNĐ</p>
+              <p>Thời gian thanh toán: ${getFormattedVietnamTime()}</p>
+              <p>Ghi chú: ${orderData.note || 'Không có'}</p>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const info = await transporter.sendMail({
+      from: process.env.GMAIL_USER,
+      to: process.env.ACCOUNTANT_EMAIL,
+      subject: `Đơn hàng #${orderData.mrc_order_id} đã thanh toán thành công`,
+      html
+    });
+    
+    console.log(`[${new Date().toISOString()}] Payment success email sent to accountant: ${info.messageId}`);
+    return true;
+  } catch (error: any) {
+    console.error(`[${new Date().toISOString()}] Payment success email to accountant failed:`, error.message);
+    return false;
+  }
+}; 
