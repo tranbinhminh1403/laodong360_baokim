@@ -7,7 +7,8 @@ const orderConfig = {
   MERCHANT_ID: process.env.MERCHANT_ID!,
   URL_SUCCESS: process.env.PAYMENT_URL_SUCCESS!,
   URL_CANCEL: process.env.PAYMENT_URL_CANCEL!,
-  URL_WEBHOOK: process.env.PAYMENT_URL_WEBHOOK!
+  URL_WEBHOOK: process.env.PAYMENT_URL_WEBHOOK!,
+  URL_DETAIL: process.env.PAYMENT_URL_DETAIL!
 };
 
 export const handleCreateOrder = async (req: Request, res: Response) => {

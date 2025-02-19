@@ -10,6 +10,7 @@ interface OrderConfig {
   URL_SUCCESS: string;
   URL_CANCEL: string;
   URL_WEBHOOK: string;
+  URL_DETAIL: string;
 }
 
 export const createOrder = async (
@@ -30,6 +31,7 @@ export const createOrder = async (
       webhooks: config.URL_WEBHOOK,
       url_success: config.URL_SUCCESS,
       url_cancel: config.URL_CANCEL,
+      url_detail: config.URL_DETAIL,
       lang: orderData.lang || 'vi'
     }, {
       headers: {
