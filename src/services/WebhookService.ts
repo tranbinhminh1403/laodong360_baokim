@@ -50,11 +50,14 @@ const processWebhook = async (payload: WebhookPayload): Promise<boolean> => {
     return false;
   }
 
-  // await OrderRepository.updateOrderStatus(existingOrder.id, 'Completed');
-  // await sendPaymentSuccessEmail(existingOrder);
+  const orderWithTotalAmount = {
+    ...existingOrder,
+    price: txn.total_amount 
+  };
+
   await Promise.all([
     OrderRepository.updateOrderStatus(existingOrder.id, 'Completed'),
-    sendPaymentSuccessEmail(existingOrder),
+    sendPaymentSuccessEmail(orderWithTotalAmount),
     sendPaymentSuccessEmailToAdmin(existingOrder),
     sendPaymentSuccessEmailToAccountant(existingOrder)
   ]);
