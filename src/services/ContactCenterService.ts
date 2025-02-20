@@ -15,6 +15,7 @@ export const contactCenterLogin = async (): Promise<ContactCenterLoginResponse> 
   try {
     console.log('Attempting Contact Center login with URL:', process.env.CONTACT_CENTER_API_URL);
     console.log('Using email:', process.env.CONTACT_CENTER_ACCOUNT_EMAIL);
+    console.log('Using password:', process.env.CONTACT_CENTER_ACCOUNT_PASSWORD);
     
     if (!process.env.CONTACT_CENTER_API_URL || !process.env.CONTACT_CENTER_ACCOUNT_EMAIL || !process.env.CONTACT_CENTER_ACCOUNT_PASSWORD) {
       throw new Error('Missing Contact Center configuration');
