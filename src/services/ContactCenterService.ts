@@ -14,7 +14,7 @@ const getAccessToken = async (): Promise<string> => {
 export const contactCenterLogin = async (): Promise<ContactCenterLoginResponse> => {
   try {
     const response = await axios.post(`${process.env.CONTACT_CENTER_API_URL}/login`, {
-      username: process.env.CONTACT_CENTER_ACCOUNT_EMAIL,
+      email: process.env.CONTACT_CENTER_ACCOUNT_EMAIL,
       password: process.env.CONTACT_CENTER_ACCOUNT_PASSWORD
     });
     return response.data;
