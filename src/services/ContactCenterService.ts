@@ -13,15 +13,36 @@ const getAccessToken = async (): Promise<string> => {
 
 export const contactCenterLogin = async (): Promise<ContactCenterLoginResponse> => {
   try {
-    console.log('Attempting Contact Center login...');
+    console.log('Attempting Contact Center login with URL:', process.env.CONTACT_CENTER_API_URL);
+    console.log('Using email:', process.env.CONTACT_CENTER_ACCOUNT_EMAIL);
+    
+    if (!process.env.CONTACT_CENTER_API_URL || !process.env.CONTACT_CENTER_ACCOUNT_EMAIL || !process.env.CONTACT_CENTER_ACCOUNT_PASSWORD) {
+      throw new Error('Missing Contact Center configuration');
+    }
+
     const response = await axios.post(`${process.env.CONTACT_CENTER_API_URL}/login`, {
       email: process.env.CONTACT_CENTER_ACCOUNT_EMAIL,
       password: process.env.CONTACT_CENTER_ACCOUNT_PASSWORD
     });
-    console.log('Contact Center login successful');
+
+    if (!response.data || !response.data.access_token) {
+      console.error('Invalid login response:', response.data);
+      throw new Error('Invalid login response structure');
+    }
+
+    console.log('Contact Center login successful with status:', response.status);
     return response.data;
   } catch (error: any) {
-    console.error('Contact Center login failed:', error.response?.data || error.message);
+    console.error('Contact Center login failed:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers
+      }
+    });
     throw error;
   }
 };

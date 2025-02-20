@@ -62,7 +62,14 @@ const processWebhook = async (payload: WebhookPayload): Promise<boolean> => {
 
     // 3. Contact Center Integration
     console.log('\n3. Starting Contact Center Integration...');
+    let contactCenterSuccess = false;
+
     try {
+      // Verify environment variables
+      if (!process.env.CONTACT_CENTER_API_URL) {
+        throw new Error('Contact Center API URL not configured');
+      }
+
       // 3.1 Login to Contact Center
       console.log('3.1 Logging into Contact Center...');
       const loginResponse = await contactCenterLogin();
@@ -93,10 +100,18 @@ const processWebhook = async (payload: WebhookPayload): Promise<boolean> => {
         priority: 2
       });
       console.log('✅ Ticket created:', ticketResponse);
+      
+      contactCenterSuccess = true;
     } catch (error: any) {
-      console.error('❌ Contact Center Integration failed:', error.message);
+      console.error('❌ Contact Center Integration failed:', {
+        error: error.message,
+        response: error.response?.data,
+        stack: error.stack
+      });
       // Continue processing even if contact center integration fails
     }
+
+    console.log(`Contact Center Integration ${contactCenterSuccess ? 'succeeded' : 'failed'}`);
 
     // 4. Update order and send emails
     console.log('\n4. Updating order status and sending notifications...');
