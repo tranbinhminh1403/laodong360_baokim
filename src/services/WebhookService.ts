@@ -2,7 +2,7 @@ import { WebhookPayload } from '../types/Types';
 import * as OrderRepository from '../repositories/OrderRepository';
 import { verifyWebhook } from '../utils/webhookVerify';
 import { sendPaymentSuccessEmail, sendPaymentSuccessEmailToAccountant, sendPaymentSuccessEmailToAdmin } from './EmailService';
-
+import { contactCenterLogin, createContactCenterCustomer, createContactCenterTicket } from './ContactCenterService';
 export const handleWebhook = async (
   webhookData: string,
   secretKey: string
@@ -55,8 +55,24 @@ const processWebhook = async (payload: WebhookPayload): Promise<boolean> => {
   await Promise.all([
     OrderRepository.updateOrderStatus(existingOrder.id, 'Completed'),
     sendPaymentSuccessEmail(existingOrder),
-    sendPaymentSuccessEmailToAdmin(existingOrder),
-    sendPaymentSuccessEmailToAccountant(existingOrder)
+    // sendPaymentSuccessEmailToAdmin(existingOrder),
+    sendPaymentSuccessEmailToAccountant(existingOrder),
+    contactCenterLogin(),
+    createContactCenterCustomer({
+      lastname: existingOrder.fullName,
+      email: existingOrder.email,
+      phonenumber: existingOrder.phoneNumber,
+      country: 243,
+      default_currency: 3,
+      default_language: 'vietnamese'
+    }),
+    createContactCenterTicket({
+      name: existingOrder.fullName,
+      email: existingOrder.email,
+      department: 1,
+      subject: existingOrder.title,
+      priority: 2
+    })
   ]);
 
   return true;

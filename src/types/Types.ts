@@ -104,3 +104,59 @@ export interface IOrderResponse {
   error?: string;
   error_response?: any;
 } 
+
+export interface ContactCenterLogin {
+  email: string;
+  password: string;
+}
+
+export interface ContactCenterLoginResponse {
+  status: number;
+  access_token: string;
+}
+
+export interface ContactCenterCreateTicket {
+  name: string;
+  email: string;
+  userid?: number;
+  contactid?: number;
+  department?: number | 1;
+  priority?: number | 2;
+  status?: number;
+  subject: string;
+  assigned?: string;
+}
+
+export interface ContactCenterCreateCustomer {
+  firstname?: string;
+  lastname: string;
+  email: string;
+  phonenumber: string;
+  company?: string;
+  vat?: string;
+  website?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  group?: number[];
+  country: number | 243;
+  default_currency: number | 3;
+  default_language: string | 'vietnamese';
+  billing_street?: string;
+  billing_city?: string;
+  billing_state?: string;
+  billing_zip?: number;
+  billing_country?: number;
+  shipping_street?: string;
+  shipping_city?: string;
+  shipping_state?: string;
+  shipping_zip?: number;
+  shipping_country?: number;
+  permissions?: number[];
+}
+
+export interface ContactCenterCreateResponse {
+  status: number;
+  message: string;
+}
