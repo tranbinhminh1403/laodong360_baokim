@@ -65,7 +65,6 @@ const processWebhook = async (payload: WebhookPayload): Promise<boolean> => {
     let contactCenterSuccess = false;
 
     try {
-      // Verify environment variables
       if (!process.env.CONTACT_CENTER_API_URL) {
         throw new Error('Contact Center API URL not configured');
       }
@@ -78,17 +77,25 @@ const processWebhook = async (payload: WebhookPayload): Promise<boolean> => {
       }
       console.log('✅ Contact Center login successful');
 
-      // 3.2 Create Customer
-      console.log('\n3.2 Creating Contact Center Customer...');
-      const customerResponse = await createContactCenterCustomer({
-        lastname: existingOrder.fullName,
-        email: existingOrder.email,
-        phonenumber: existingOrder.phoneNumber,
-        country: 243,
-        default_currency: 3,
-        default_language: 'vietnamese'
-      });
-      console.log('✅ Customer created:', customerResponse);
+      // 3.2 Try to create Customer (ignore if exists)
+      console.log('\n3.2 Attempting to create Contact Center Customer...');
+      try {
+        const customerResponse = await createContactCenterCustomer({
+          lastname: existingOrder.fullName,
+          email: existingOrder.email,
+          phonenumber: existingOrder.phoneNumber,
+          country: 243,
+          default_currency: 3,
+          default_language: 'vietnamese'
+        });
+        console.log('✅ Customer created:', customerResponse);
+      } catch (customerError: any) {
+        if (customerError.response?.status === 422) {
+          console.log('ℹ️ Customer already exists, continuing with ticket creation');
+        } else {
+          console.error('❌ Customer creation failed:', customerError.message);
+        }
+      }
 
       // 3.3 Create Ticket
       console.log('\n3.3 Creating Contact Center Ticket...');
