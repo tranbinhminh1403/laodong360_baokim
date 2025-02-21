@@ -40,6 +40,8 @@ export const createOrder = async (
       }
     });
 
+    console.log(response.data);
+
     if (response.data.data.order_id) {
       const order = {
         ...orderData,
