@@ -2,7 +2,7 @@ import { WebhookPayload } from '../types/Types';
 import * as OrderRepository from '../repositories/OrderRepository';
 import { verifyWebhook } from '../utils/webhookVerify';
 import { sendPaymentSuccessEmail, sendPaymentSuccessEmailToAccountant, sendPaymentSuccessEmailToAdmin } from './EmailService';
-import { contactCenterLogin, createContactCenterCustomer, createContactCenterTicket } from './ContactCenterService';
+import { contactCenterLogin, createContactCenterCustomer, createContactCenterTicket, getCustomerByPhone } from './ContactCenterService';
 export const handleWebhook = async (
   webhookData: string,
   secretKey: string
@@ -63,6 +63,7 @@ const processWebhook = async (payload: WebhookPayload): Promise<boolean> => {
     // 3. Contact Center Integration
     console.log('\n3. Starting Contact Center Integration...');
     let contactCenterSuccess = false;
+    let customerId: number | null = null;
 
     try {
       if (!process.env.CONTACT_CENTER_API_URL) {
@@ -80,21 +81,28 @@ const processWebhook = async (payload: WebhookPayload): Promise<boolean> => {
       // 3.2 Try to create Customer (ignore if exists)
       console.log('\n3.2 Attempting to create Contact Center Customer...');
       try {
-        const customerResponse = await createContactCenterCustomer({
-          lastname: existingOrder.fullName,
-          email: existingOrder.email,
-          phonenumber: existingOrder.phoneNumber,
-          country: 243,
-          default_currency: 3,
-          default_language: 'vietnamese'
-        });
-        console.log('✅ Customer created:', customerResponse);
-      } catch (customerError: any) {
-        if (customerError.response?.status === 422) {
-          console.log('ℹ️ Customer already exists, continuing with ticket creation');
+        // First, try to find existing customer
+        customerId = await getCustomerByPhone(existingOrder.phoneNumber);
+        
+        if (!customerId) {
+          // If customer doesn't exist, create new one
+          const customerResponse = await createContactCenterCustomer({
+            lastname: existingOrder.fullName,
+            email: existingOrder.email,
+            phonenumber: existingOrder.phoneNumber,
+            country: 243,
+            default_currency: 3,
+            default_language: 'vietnamese'
+          });
+          console.log('✅ Customer created:', customerResponse);
+          
+          // Get the newly created customer's ID
+          customerId = await getCustomerByPhone(existingOrder.phoneNumber);
         } else {
-          console.error('❌ Customer creation failed:', customerError.message);
+          console.log('✅ Existing customer found with ID:', customerId);
         }
+      } catch (customerError: any) {
+        console.error('❌ Customer operation failed:', customerError.message);
       }
 
       // 3.3 Create Ticket
@@ -102,6 +110,7 @@ const processWebhook = async (payload: WebhookPayload): Promise<boolean> => {
       const ticketResponse = await createContactCenterTicket({
         name: existingOrder.fullName,
         email: existingOrder.email,
+        contactid: customerId || undefined,
         department: 1,
         subject: existingOrder.title,
         priority: 2

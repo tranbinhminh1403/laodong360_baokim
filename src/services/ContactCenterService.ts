@@ -69,6 +69,21 @@ export const createContactCenterCustomer = async (customerData: ContactCenterCre
   }
 };
 
+export const getCustomerId = async (customerData: ContactCenterCreateCustomer): Promise<ContactCenterCreateResponse> => {
+  try {
+    const token = await getAccessToken();
+    const response = await axios.get(`${process.env.CONTACT_CENTER_API_URL}/contacts?q=${customerData.phonenumber}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
 export const createContactCenterTicket = async (ticketData: ContactCenterCreateTicket): Promise<ContactCenterCreateResponse> => {
   try {
     const token = await getAccessToken();
@@ -85,5 +100,27 @@ export const createContactCenterTicket = async (ticketData: ContactCenterCreateT
   } catch (error) {
     console.error(error);
     throw error;
+  }
+};
+
+export const getCustomerByPhone = async (phoneNumber: string): Promise<number | null> => {
+  try {
+    const token = await getAccessToken();
+    const response = await axios.get(
+      `${process.env.CONTACT_CENTER_API_URL}/contacts?q=${phoneNumber}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+
+    if (response.data?.data?.[0]?.id) {
+      return response.data.data[0].id;
+    }
+    return null;
+  } catch (error: any) {
+    console.error('Failed to get customer by phone:', error.message);
+    return null;
   }
 };
