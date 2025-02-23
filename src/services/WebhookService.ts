@@ -106,14 +106,15 @@ const processWebhook = async (payload: WebhookPayload): Promise<boolean> => {
       }
 
       // 3.3 Create Ticket
-      console.log('\n3.3 Creating Contact Center Ticket...');
+      console.log("\n3.3 Creating Contact Center Ticket...");
       const ticketResponse = await createContactCenterTicket({
         name: existingOrder.fullName,
         email: existingOrder.email,
         contactid: customerId || undefined,
         department: 1,
-        subject: existingOrder.title,
-        priority: 2
+        subject: `[Gói hỗ trợ: ${existingOrder.title}]\n
+        Vấn đề: ${existingOrder.note}\n Ngày hẹn: ${existingOrder.time}`,
+        priority: 2,
       });
       console.log('✅ Ticket created:', ticketResponse);
       
