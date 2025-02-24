@@ -8,11 +8,13 @@ const router = Router();
 
 // Public routes
 router.post('/auth/login', handleLogin);
-router.post('/auth/logout', handleLogout);
+router.post('/send-order', handleCreateOrder);
+router.post('/webhook', handleWebhookCallback);
 
 // Protected routes
 router.get('/', authenticateToken as any, handleGetOrders);
-// router.post('/', authenticateToken, handleCreateOrder);
-router.post('/webhook', handleWebhookCallback);
+router.post('/auth/logout', handleLogout);
+
+
 
 export default router; 
