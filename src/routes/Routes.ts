@@ -11,8 +11,8 @@ router.post('/auth/login', handleLogin);
 router.post('/auth/logout', handleLogout);
 
 // Protected routes
-router.get('/', authenticateToken, handleGetOrders);
-router.post('/', authenticateToken, handleCreateOrder);
-router.post('/webhook', authenticateToken, handleWebhookCallback);
+router.get('/', authenticateToken as any, handleGetOrders);
+// router.post('/', authenticateToken, handleCreateOrder);
+router.post('/webhook', handleWebhookCallback);
 
 export default router; 

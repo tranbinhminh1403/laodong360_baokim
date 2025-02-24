@@ -23,7 +23,7 @@ export const handleCreateOrder = async (req: Request, res: Response) => {
   }
 };
 
-export const handleGetOrders = async (req: Request, res: Response) => {
+export const handleGetOrders = async (req: Request, res: Response) : Promise<any> => {
   try {
     const { status } = req.query;
     let statusFilter: string | string[] | undefined;

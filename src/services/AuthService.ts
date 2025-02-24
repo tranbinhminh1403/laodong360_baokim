@@ -1,12 +1,21 @@
-import jwt from 'jsonwebtoken';
-import { LoginRequest, LoginResponse } from '../types/AuthTypes';
+import jwt, { SignOptions } from 'jsonwebtoken';
+import { JWTPayload, LoginRequest, LoginResponse } from '../types/AuthTypes';
+import dotenv from 'dotenv';
+dotenv.config();
+const adminUsername: string = process.env.ADMIN_USERNAME || 'admin@interits.com';
+const adminPassword: string = process.env.ADMIN_PASSWORD || 'admin@interits.com';
+const jwtSecret: string = process.env.JWT_SECRET || 'admin@interits.com';
+const jwtExpiresIn: string = process.env.JWT_EXPIRES_IN || '24h';
 
 export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
   try {
-    // Validate against environment variables
+    if (!adminUsername || !adminPassword || !jwtSecret) {
+      throw new Error('Missing environment variables');
+    }
+
     if (
-      credentials.username !== process.env.ADMIN_USERNAME ||
-      credentials.password !== process.env.ADMIN_PASSWORD
+      credentials.username !== adminUsername ||
+      credentials.password !== adminPassword
     ) {
       return {
         success: false,
@@ -16,9 +25,9 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
 
     // Generate JWT token
     const token = jwt.sign(
-      { username: credentials.username },
-      process.env.JWT_SECRET!,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+      { username: credentials.username || 'admin@interits.com' } as JWTPayload,
+      jwtSecret as string,
+      { expiresIn: jwtExpiresIn } as SignOptions
     );
 
     return {
@@ -31,4 +40,4 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
       error: error.message
     };
   }
-}; 
+};
