@@ -55,3 +55,22 @@ export const updateOrderStatus = async (id: string, status: string): Promise<Ord
         throw new Error(`Lỗi khi cập nhật trạng thái đơn hàng: ${error.message}`);
     }
 };
+
+export const getAllOrdersWithFilter = async (status?: string | string[]) => {
+  try {
+    const queryBuilder = orderRepository.createQueryBuilder('order')
+      .orderBy('order.createdAt', 'DESC');
+
+    if (status) {
+      if (Array.isArray(status)) {
+        queryBuilder.where('order.status IN (:...status)', { status });
+      } else {
+        queryBuilder.where('order.status = :status', { status });
+      }
+    }
+
+    return await queryBuilder.getMany();
+  } catch (error: any) {
+    throw new Error(`Error fetching orders: ${error.message}`);
+  }
+};

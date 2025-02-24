@@ -71,4 +71,19 @@ export const createOrder = async (
       error_response: error.response?.data
     };
   }
+};
+
+export const getOrders = async (status?: string | string[]) => {
+  try {
+    const orders = await OrderRepository.getAllOrdersWithFilter(status);
+    return {
+      success: true,
+      data: orders
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message
+    };
+  }
 }; 

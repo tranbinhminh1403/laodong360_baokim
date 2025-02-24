@@ -1,3 +1,5 @@
+import { JWTPayload } from "./AuthTypes";
+
 export interface BaoKimOrder {
     id: number;
     user_id: number;
@@ -159,4 +161,12 @@ export interface ContactCenterCreateCustomer {
 export interface ContactCenterCreateResponse {
   status: number;
   message: string;
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: JWTPayload;
+    }
+  }
 }
