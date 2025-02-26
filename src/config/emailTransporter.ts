@@ -1,15 +1,14 @@
 import nodemailer from 'nodemailer';
 
 export const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    pool: true, // Sử dụng connection pooling
-    maxConnections: 5, // Số lượng kết nối tối đa
+    host: 'pro57.emailserver.vn',
+    port: 465,
+    secure: true, // use SSL/TLS
+    pool: true,
+    maxConnections: 5,
     maxMessages: Infinity,
     auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD
+        user: process.env.MAIL_USERNAME,
+        pass: process.env.MAIL_PASSWORD
     }
 }); 
