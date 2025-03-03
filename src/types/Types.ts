@@ -88,7 +88,7 @@ export interface IOrderRequest {
   email: string;
   age: number;
   fullName: string;
-  gender: string;
+  // gender: string;
   phoneNumber: string;
   note: string;
   title: string;

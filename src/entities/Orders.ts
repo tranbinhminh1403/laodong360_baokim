@@ -14,8 +14,11 @@ export class Orders {
     @Column()
     fullName: string;
 
+    // @Column()
+    // gender: string;
+
     @Column()
-    gender: string;
+    location: string;
 
     @Column()
     phoneNumber: string;
