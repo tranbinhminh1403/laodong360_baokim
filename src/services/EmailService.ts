@@ -42,10 +42,7 @@ export const sendPaymentSuccessEmail = async (orderData: Partial<Orders>): Promi
                 <div class="info-label">Số điện thoại:</div>
                 <div class="info-value">${orderData.phoneNumber}</div>
               </div>
-              <div class="info-group">
-                <div class="info-label">Tuổi:</div>
-                <div class="info-value">${orderData.age}</div>
-              </div>
+
               <div class="info-group">
                 <div class="info-label">Tỉnh thành:</div>
                 <div class="info-value">${orderData.location}</div>
@@ -129,7 +126,7 @@ export const sendNewOrderNotification = async (orderData: Partial<Orders>): Prom
               <p>Họ tên: ${orderData.fullName}</p>
               <p>Email: ${orderData.email}</p>
               <p>Số điện thoại: ${orderData.phoneNumber}</p>
-              <p>Tuổi: ${orderData.age}</p>
+
               <p>Tỉnh thành: ${orderData.location}</p>
             </div>
 
@@ -187,7 +184,6 @@ export const sendPaymentSuccessEmailToAdmin = async (orderData: Partial<Orders>)
               <p>Họ tên: ${orderData.fullName}</p>
               <p>Email: ${orderData.email}</p>
               <p>Số điện thoại: ${orderData.phoneNumber}</p>
-              <p>Tuổi: ${orderData.age}</p>
               <p>Tỉnh thành: ${orderData.location}</p>
             </div>
 
@@ -245,7 +241,6 @@ export const sendPaymentSuccessEmailToAccountant = async (orderData: Partial<Ord
               <p>Họ tên: ${orderData.fullName}</p>
               <p>Email: ${orderData.email}</p>
               <p>Số điện thoại: ${orderData.phoneNumber}</p>
-              <p>Tuổi: ${orderData.age}</p>
               <p>Tỉnh thành: ${orderData.location}</p>
             </div>
 

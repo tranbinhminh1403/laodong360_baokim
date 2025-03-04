@@ -8,8 +8,8 @@ export class Orders {
     @Column()
     email: string;
 
-    @Column()
-    age: number;
+    // @Column()
+    // age: number;
 
     @Column()
     fullName: string;
